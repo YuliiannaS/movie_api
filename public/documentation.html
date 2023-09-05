@@ -4,9 +4,96 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <style>
+      table {
+          border-collapse: collapse;
+          width: 100%;
+          margin-bottom: 20px;
+      }
+      th, td {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+      }
+      th {
+          background-color: #f2f2f2;
+      }
+  </style>
   </head>
   <body>
     <h1>Documentation</h1>
     <p>This guide explains how to use our API server. It helps your apps connect with our services through easy-to-use endpoints. See below for endpoint details, parameters, and responses.</p>
+    <table>
+      <tr>
+          <th>Method</th>
+          <th>Route</th>
+          <th>Description</th>
+          <th>Request Body</th>
+          <th>Response</th>
+      </tr>
+      <tr>
+          <td>POST</td>
+          <td>/users</td>
+          <td>Create a user</td>
+          <td>JSON Object with user data<br><em>Example:</em><br>{"email": "user@example.com", "username": "newuser", "password": "password123"}</td>
+          <td>Success: "User created!"<br>Error: "This email already exists"</td>
+      </tr>
+      <tr>
+          <td>PUT</td>
+          <td>/users/:email</td>
+          <td>Update user's username</td>
+          <td>JSON Object with updated data<br><em>Example:</em><br>{"username": "updatedusername"}</td>
+          <td>Success: "User updated!"<br>Error: "This email does not exist"</td>
+      </tr>
+      <tr>
+          <td>POST</td>
+          <td>/users/:email/:movieName</td>
+          <td>Favorite a movie for a user</td>
+          <td>Not applicable</td>
+          <td>Success: "Movie 'movieName' favorited!"<br>Error: "This email or movie does not exist"</td>
+      </tr>
+      <tr>
+          <td>DELETE</td>
+          <td>/users/:email/:movieName</td>
+          <td>Remove a movie from user's favorites</td>
+          <td>Not applicable</td>
+          <td>Success: "Movie 'movieName' removed from favorite!"<br>Error: "This email or movie does not exist"</td>
+      </tr>
+      <tr>
+          <td>DELETE</td>
+          <td>/users</td>
+          <td>Delete a user</td>
+          <td>JSON Object with user email<br><em>Example:</em><br>{"email": "user@example.com"}</td>
+          <td>Success: "User removed!"<br>Error: "This email was not found"</td>
+      </tr>
+      <tr>
+          <td>GET</td>
+          <td>/movies</td>
+          <td>Get all movies</td>
+          <td>Not applicable</td>
+          <td>Array of movie objects</td>
+      </tr>
+      <tr>
+          <td>GET</td>
+          <td>/movies/:name</td>
+          <td>Get a single movie by title</td>
+          <td>Not applicable</td>
+          <td>Single movie object</td>
+      </tr>
+      <tr>
+          <td>GET</td>
+          <td>/movies/genre/:name</td>
+          <td>Get movies by genre name</td>
+          <td>Not applicable</td>
+          <td>Array of movie objects</td>
+      </tr>
+      <tr>
+          <td>GET</td>
+          <td>/movies/directors/:name</td>
+          <td>Get movies by director name</td>
+          <td>Not applicable</td>
+          <td>Array of movie objects</td>
+      </tr>
+  </table>
   </body>
 </html>
