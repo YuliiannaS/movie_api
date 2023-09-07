@@ -1,5 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors');
+const { check, validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 const { Director, Genre, Movie, User } = require('./models');
 const passport = require('passport');
@@ -7,6 +9,7 @@ require('./passport');
 
 const app = express();
 const port = 8080;
+app.use(cors());
 const auth = require('./auth')(app);
 
 mongoose.connect('mongodb://127.0.0.1:27017/moviedb', {
@@ -25,62 +28,86 @@ app.use(express.json()); // For parsing JSON data
 app.use(morgan('dev'));  // Using Morgan for request logging
 app.use(express.static('public')); // Serve static files
 
-app.post('/users', (req, res) => {
-    const { email, username, password } = req.body;
-    if (email && username && password) {
-        User.findOne({ email })
-            .then(existingUser => {
-                if (existingUser) {
-                    res.status(400).send('This email already exists');
-                } else {
-                    const newUser = new User({
-                        email,
-                        username,
-                        password,
-                        favorite: [],
-                    });
-                    return newUser.save()
-                        .then(() => {
-                            res.status(200).send('User created!');
-                            return;
-                        })
-                }
-            })
-            .catch(error => {
-                console.error('Error creating user:', error);
-                res.status(500).send('Internal server error');
-                return;
-            });
-    } else {
-        res.status(400).send('Missing data');
-    }
-});
+
+app.post('/users',
+    [
+        check('username', 'Username is required').isLength({ min: 5 }),
+        check('username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+        check('password', 'Password is required').not().isEmpty(),
+        check('email', 'Email does not appear to be valid').isEmail()
+    ],
+    (req, res) => {
+        let errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(422).json({ errors: errors.array() });
+        }
+        const { email, username, password } = req.body;
+        let hashedPassword = User.hashPassword(req.body.password);
+        if (email && username && password) {
+            User.findOne({ username })
+                .then(existingUser => {
+                    if (existingUser) {
+                        res.status(400).send('This email already exists');
+                    } else {
+                        User
+                            .create({
+                                email,
+                                username,
+                                password: hashedPassword,
+                                favorite: [],
+                            })
+                            .then(() => {
+                                res.status(201).send('User created!');
+                                return;
+                            })
+                            .catch((error) => {
+                                console.error(error);
+                                res.status(500).send('Error: ' + error);
+                            });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error creating user:', error);
+                    res.status(500).send('Internal server error');
+                    return;
+                });
+        } else {
+            res.status(400).send('Missing data');
+        }
+    });
 
 
-app.put('/users/:email', passport.authenticate('jwt', { session: false }), (req, res) => {
-    const email = req.params.email;
-    const username = req.body.username;
-    if (username) {
-        User.findOne({ email })
-            .then(user => {
-                if (!user) {
-                    res.status(400).send('This email does not exist');
-                } else {
-                    user.username = username;
-                    return user.save()
-                        .then(() => {
-                            res.status(200).send('User updated!');
-                        })
-                }
-            })
-            .catch(error => {
-                console.error('Error updating user:', error);
-                res.status(500).send('Internal server error');
-            });
-    } else {
-        res.status(400).send('Missing data');
-    }
-});
+app.put('/users/:email',
+    [
+        check('username', 'Username is required').isLength({ min: 5 }),
+        check('username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+        check('password', 'Password is required').not().isEmpty(),
+        check('email', 'Email does not appear to be valid').isEmail(),
+    ], passport.authenticate('jwt', { session: false }), (req, res) => {
+        const email = req.params.email;
+        const username = req.body.username;
+        if (username) {
+            User.findOne({ email })
+                .then(user => {
+                    if (!user) {
+                        res.status(400).send('This email does not exist');
+                    } else {
+                        user.username = username;
+                        return user.save()
+                            .then(() => {
+                                res.status(200).send('User updated!');
+                            })
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating user:', error);
+                    res.status(500).send('Internal server error');
+                });
+        } else {
+            res.status(400).send('Missing data');
+        }
+    });
 
 app.post('/users/:email/:movieName', passport.authenticate('jwt', { session: false }), (req, res) => {
     const email = req.params.email;
