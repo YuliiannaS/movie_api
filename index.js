@@ -12,7 +12,7 @@ const port = process.env.PORT || 8080;
 app.use(cors());
 const auth = require('./auth')(app);
 
-mongoose.connect('mongodb://127.0.0.1:27017/moviedb', {
+mongoose.connect(process.env.CONNECTION_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
