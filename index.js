@@ -8,7 +8,7 @@ const passport = require('passport');
 require('./passport');
 
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 8080;
 app.use(cors());
 const auth = require('./auth')(app);
 
@@ -265,6 +265,6 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something went wrong!');
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
     console.log(`Server is running on port ${port}`);
 });
