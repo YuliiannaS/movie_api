@@ -23,6 +23,7 @@
   <body>
     <h1>Documentation</h1>
     <p>This guide explains how to use our API server. It helps your apps connect with our services through easy-to-use endpoints. See below for endpoint details, parameters, and responses.</p>
+    <p>Api url: <a href="https://users-movies-f50a18657028.herokuapp.com/">https://users-movies-f50a18657028.herokuapp.com/</a></p>
     <table>
       <tr>
           <th>Method</th>
@@ -35,14 +36,18 @@
           <td>POST</td>
           <td>/users</td>
           <td>Create a user</td>
-          <td>JSON Object with user data<br><em>Example:</em><br>{"email": "user@example.com", "username": "newuser", "password": "password123"}</td>
+          <td>JSON Object with user data<br><em>Example:</em>
+            <pre>{"email": "user@example.com", "username": "newuser", "password": "password123"}</pre>
+          </td>
           <td>Success: "User created!"<br>Error: "This email already exists"</td>
       </tr>
       <tr>
           <td>PUT</td>
           <td>/users/:email</td>
           <td>Update user's username</td>
-          <td>JSON Object with updated data<br><em>Example:</em><br>{"username": "updatedusername"}</td>
+          <td>JSON Object with updated data<br><em>Example:</em>
+            <pre>{"username": "updatedusername"}</pre>
+          </td>
           <td>Success: "User updated!"<br>Error: "This email does not exist"</td>
       </tr>
       <tr>
@@ -63,7 +68,9 @@
           <td>DELETE</td>
           <td>/users</td>
           <td>Delete a user</td>
-          <td>JSON Object with user email<br><em>Example:</em><br>{"email": "user@example.com"}</td>
+          <td>JSON Object with user email<br><em>Example:</em>
+            <pre>{"email": "user@example.com"}</pre>
+          </td>
           <td>Success: "User removed!"<br>Error: "This email was not found"</td>
       </tr>
       <tr>
