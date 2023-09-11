@@ -50,9 +50,14 @@
     </tr>
     <tr>
       <td>POST</td>
-      <td>/login?Username=<i>user_name</i>&Password=<i>user_password</i></td>
+      <td>/login</td>
       <td>Authorize user</td>
-      <td>Not applicable</td>
+      <td><pre>
+        {
+          "username": "user_name",
+          "password": "user_password"
+        }
+      </pre></td>
       <td>Success:
         <pre>
             {

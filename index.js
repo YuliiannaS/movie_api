@@ -1,14 +1,16 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const cors = require('cors');
 const { check, validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 const { Director, Genre, Movie, User } = require('./models');
 const passport = require('passport');
-require('./passport');
 
 const app = express();
 const port = process.env.PORT || 8080;
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 const auth = require('./auth')(app);
 
@@ -28,6 +30,7 @@ app.use(express.json()); // For parsing JSON data
 app.use(morgan('dev'));  // Using Morgan for request logging
 app.use(express.static('public')); // Serve static files
 
+require('./passport');
 
 app.post('/users',
     [
@@ -86,7 +89,12 @@ app.put('/users/:email',
         check('email', 'Email does not appear to be valid').isEmail(),
     ], passport.authenticate('jwt', { session: false }), (req, res) => {
         const email = req.params.email;
+        const authenticatedUserEmail = req.user.email;
         const username = req.body.username;
+
+        if (email !== authenticatedUserEmail) {
+            return res.status(401).send('Unauthorized: You can only update your own data.');
+        }
         if (username) {
             User.findOne({ email })
                 .then(user => {
@@ -111,7 +119,12 @@ app.put('/users/:email',
 
 app.post('/users/:email/:movieName', passport.authenticate('jwt', { session: false }), (req, res) => {
     const email = req.params.email;
+    const authenticatedUserEmail = req.user.email;
     const movieName = req.params.movieName;
+
+    if (email !== authenticatedUserEmail) {
+        return res.status(401).send('Unauthorized: You can only favorite movies for your own account.');
+    }
     if (email && movieName) {
         Promise.all([
             User.findOne({ email }),
@@ -139,7 +152,12 @@ app.post('/users/:email/:movieName', passport.authenticate('jwt', { session: fal
 
 app.delete('/users/:email/:movieName', passport.authenticate('jwt', { session: false }), (req, res) => {
     const email = req.params.email;
+    const authenticatedUserEmail = req.user.email;
     const movieName = req.params.movieName;
+
+    if (email !== authenticatedUserEmail) {
+        return res.status(401).send('Unauthorized: You can only delete your own account.');
+    }
     if (email && movieName) {
         Promise.all([
             User.findOne({ email }),
@@ -167,6 +185,11 @@ app.delete('/users/:email/:movieName', passport.authenticate('jwt', { session: f
 
 app.delete('/users', passport.authenticate('jwt', { session: false }), (req, res) => {
     const email = req.body.email;
+    const authenticatedUserEmail = req.user.email;
+
+    if (email !== authenticatedUserEmail) {
+        return res.status(401).send('Unauthorized: You can only delete your own account.');
+    }
     if (email) {
         User.findOneAndDelete({ email })
             .then(deletedUser => {
@@ -188,6 +211,8 @@ app.delete('/users', passport.authenticate('jwt', { session: false }), (req, res
 
 app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
     Movie.find()
+        .populate('genre')
+        .populate('director')
         .then(movies => {
             res.json(movies);
         })
@@ -200,6 +225,8 @@ app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) 
 app.get('/movies/:title', passport.authenticate('jwt', { session: false }), (req, res) => {
     const title = req.params.title;
     Movie.findOne({ title })
+        .populate('genre')
+        .populate('director')
         .then(movie => {
             if (movie) {
                 res.json(movie);
