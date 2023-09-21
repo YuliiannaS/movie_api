@@ -209,7 +209,7 @@ app.delete('/users', passport.authenticate('jwt', { session: false }), (req, res
 });
 
 
-app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
+app.get('/movies', (req, res) => {
     Movie.find()
         .populate('genre')
         .populate('director')
