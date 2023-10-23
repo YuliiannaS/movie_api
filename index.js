@@ -126,12 +126,12 @@ app.get('/users/:email/favorites', passport.authenticate('jwt', { session: false
     }
 
     User.findOne({ email: userEmail })
-        .populate('favorite')
+        .populate('movies')
         .then(user => {
             if (!user) {
                 return res.status(404).send('User not found');
             }
-            res.json(user.favorite);
+            res.json(user.movies);
         })
         .catch(error => {
             console.error('Error fetching user favorites:', error);
@@ -189,11 +189,24 @@ app.delete('/users/:email/:movieName', passport.authenticate('jwt', { session: f
                 if (!user || !movie) {
                     res.status(400).send('This email or movie does not exist');
                 } else {
-                    user.favorite = user.movies.filter(id => id !== movie._id);
-                    return user.save()
-                        .then(() => {
-                            res.status(200).send(`Movie "${movieName}" removed from favorites!`);
+                    const movieObjectId = new mongoose.Types.ObjectId(movie._id);
+                    User.findOneAndUpdate(
+                        { email },
+                        { $pull: { movies: movieObjectId } },
+                        { new: true }
+                    )
+                        .exec()
+                        .then((updatedUser) => {
+                            if (!updatedUser) {
+                                res.status(400).send('This email does not exist');
+                            } else {
+                                res.status(200).send(`Movie "${movieName}" removed from favorites!`);
+                            }
                         })
+                        .catch(error => {
+                            console.error('Error removing movie from favorites:', error);
+                            res.status(500).send('Internal server error');
+                        });
                 }
             })
             .catch(error => {
