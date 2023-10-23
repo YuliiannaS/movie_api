@@ -117,6 +117,28 @@ app.put('/users/:email',
         }
     });
 
+app.get('/users/:email/favorites', passport.authenticate('jwt', { session: false }), (req, res) => {
+    const userEmail = req.params.email;
+    const authenticatedUserEmail = req.user.email;
+
+    if (userEmail !== authenticatedUserEmail) {
+        return res.status(401).send('Unauthorized: You can only view your own favorites.');
+    }
+
+    User.findOne({ email: userEmail })
+        .populate('favorite')
+        .then(user => {
+            if (!user) {
+                return res.status(404).send('User not found');
+            }
+            res.json(user.favorite);
+        })
+        .catch(error => {
+            console.error('Error fetching user favorites:', error);
+            res.status(500).send('Internal server error');
+        });
+});
+
 app.post('/users/:email/:movieName', passport.authenticate('jwt', { session: false }), (req, res) => {
     const email = req.params.email;
     const authenticatedUserEmail = req.user.email;
