@@ -15,6 +15,7 @@ passport.use(
         },
         async (username, password, callback) => {
             await Users.findOne({ username: username })
+                .populate('movies')
                 .then((user) => {
                     if (!user) {
                         console.log('incorrect username');
