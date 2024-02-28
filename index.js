@@ -122,7 +122,7 @@ app.get('/users/:email/favorites', passport.authenticate('jwt', { session: false
     const authenticatedUserEmail = req.user.email;
 
     if (userEmail !== authenticatedUserEmail) {
-        return res.status(401).send('Unauthorized: You can only view your own favorites.');
+        return res.status(401).send('Unauthorized! You can only view your own favorites.');
     }
 
     User.findOne({ email: userEmail })
